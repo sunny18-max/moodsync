@@ -1,0 +1,14 @@
+2025-10-09 19:37:15,978 - tensorflow - DEBUG - Falling back to TensorFlow client; we recommended you install the Cloud TPU client directly with pip install cloud-tpu-client.
+2025-10-09 19:37:16,289 - h5py._conv - DEBUG - Creating converter from 7 to 5
+2025-10-09 19:37:16,289 - h5py._conv - DEBUG - Creating converter from 5 to 7
+2025-10-09 19:37:16,290 - h5py._conv - DEBUG - Creating converter from 7 to 5
+2025-10-09 19:37:16,290 - h5py._conv - DEBUG - Creating converter from 5 to 7
+2025-10-09 19:37:17,760 - tensorflow - WARNING - From C:\Users\saath\AppData\Local\Programs\Python\Python313\Lib\site-packages\tf_keras\src\losses.py:2976: The name tf.losses.sparse_softmax_cross_entropy is deprecated. Please use tf.compat.v1.losses.sparse_softmax_cross_entropy instead.
+
+2025-10-09 19:37:18,969 - h5py._conv - DEBUG - Creating converter from 3 to 5
+2025-10-09 19:37:19,561 - app.spotify.client - INFO - Spotify authentication successful
+2025-10-09 19:37:20,824 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.16.104.104:5000
+2025-10-09 19:37:20,825 - werkzeug - INFO - [33mPress CTRL+C to quit[0m

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Music Recommender - Spotify Style</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background: rgba(25, 20, 20, 0.8); z-index: 9999;">
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+            <h5 class="text-white">Analyzing your mood...</h5>
+            <p class="text-muted">Finding the perfect music for you</p>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <header class="mb-4">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <i class="fas fa-music fa-2x text-success me-2"></i>
+                    </div>
+                    <div class="col">
+                        <h1 class="h3 mb-0 text-white">Mood Music Recommender</h1>
+                        <p class="text-muted mb-0">Discover music that matches your emotions</p>
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge bg-success">Spotify Powered</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="image-tab" data-bs-toggle="tab" data-bs-target="#image" type="button" role="tab">
+                        <i class="fas fa-image me-2"></i>Image Analysis
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="text-tab" data-bs-toggle="tab" data-bs-target="#text" type="button" role="tab">
+                        <i class="fas fa-keyboard me-2"></i>Text Analysis
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="webcam-tab" data-bs-toggle="tab" data-bs-target="#webcam" type="button" role="tab">
+                        <i class="fas fa-camera me-2"></i>Webcam Analysis
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab">
+                        <i class="fas fa-search me-2"></i>Music Search
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content mt-4" id="myTabContent">
+                <!-- Image Analysis Tab -->
+                <div class="tab-pane fade show active" id="image" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-image me-2"></i>Upload Image</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="imageForm">
+                                        <div class="mb-3">
+                                            <label for="imageUpload" class="form-label">Select an image</label>
+                                            <input class="form-control" type="file" id="imageUpload" accept="image/*">
+                                            <div class="form-text">
+                                                Supported formats: JPG, PNG, WebP. Max size: 20MB
+                                            </div>
+                                        </div>
+                                        <div id="imagePreview" class="mb-3 text-center"></div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-analytics me-2"></i>Analyze Emotion
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-music me-2"></i>Analysis Results</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="imageResults">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Upload an image to analyze facial emotions and get music recommendations.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Analysis Tab -->
+                <div class="tab-pane fade" id="text" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-keyboard me-2"></i>Describe Your Mood</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="textForm">
+                                        <div class="mb-3">
+                                            <label for="textInput" class="form-label">How are you feeling?</label>
+                                            <textarea class="form-control" id="textInput" rows="5" 
+                                                      placeholder="Describe your current mood, feelings, or what you're going through..."></textarea>
+                                            <div class="form-text">
+                                                Examples: "I'm feeling happy and energetic today", "Just had a rough day at work", "Excited for the weekend!"
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-analytics me-2"></i>Analyze Text Emotion
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-music me-2"></i>Analysis Results</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="textResults">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Describe your mood in text to get personalized music recommendations.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Webcam Analysis Tab -->
+                <div class="tab-pane fade" id="webcam" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-camera me-2"></i>Webcam Analysis</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="webcam-container mb-3">
+                                        <video id="webcamVideo" autoplay playsinline class="w-100"></video>
+                                        <div id="captureOverlay" class="capture-overlay">
+                                            <i class="fas fa-camera fa-3x"></i>
+                                        </div>
+                                        <canvas id="webcamCanvas" class="d-none"></canvas>
+                                    </div>
+                                    <div class="row g-2">
+                                        <div class="col">
+                                            <button id="startWebcam" class="btn btn-success w-100">
+                                                <i class="fas fa-play me-2"></i>Start Webcam
+                                            </button>
+                                        </div>
+                                        <div class="col">
+                                            <button id="captureEmotion" class="btn btn-primary w-100" disabled>
+                                                <i class="fas fa-camera me-2"></i>Capture & Analyze
+                                            </button>
+                                        </div>
+                                        <div class="col">
+                                            <button id="stopWebcam" class="btn btn-danger w-100" disabled>
+                                                <i class="fas fa-stop me-2"></i>Stop Webcam
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-warning mt-3">
+                                        <small>
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Make sure your face is well-lit and clearly visible for best results.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-music me-2"></i>Analysis Results</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="webcamResults">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Start your webcam and capture a photo to analyze your facial emotions.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Music Search Tab -->
+                <div class="tab-pane fade" id="search" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Search Music</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="searchForm">
+                                        <div class="mb-3">
+                                            <label for="searchInput" class="form-label">Search for music</label>
+                                            <input type="text" class="form-control" id="searchInput" 
+                                                   placeholder="Search for songs, artists, or genres...">
+                                            <div class="form-text">
+                                                Search directly in Spotify's music library
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-search me-2"></i>Search Music
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fas fa-music me-2"></i>Search Results</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="searchResults">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Search for specific songs, artists, or genres to discover new music.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
