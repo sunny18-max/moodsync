@@ -342,51 +342,52 @@ function displayResults(result, containerId) {
         html += `</div></div>`;
     }
     
-    // Music recommendations
+    html += `</div></div>`;
+    
+    // Music recommendations - displayed below
     if (tracks.length > 0) {
         html += `
-            <div class="mt-4">
-                <h6><i class="fas fa-music me-2"></i>Recommended Music</h6>
-                <p class="text-muted mb-3">Based on your ${emotion} mood</p>
-                <div class="tracks-container">
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-music me-2"></i>Recommended Music</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Based on your ${emotion} mood - ${tracks.length} tracks found</p>
+                    <div class="tracks-container">
         `;
         
         tracks.forEach(track => {
             html += `
                 <div class="track-card">
-                    <div class="row align-items-center">
-                        <div class="col-auto">
-                            ${track.album_image ? 
-                                `<img src="${track.album_image}" class="track-image" alt="Album cover">` :
-                                `<div class="track-image">
-                                    <i class="fas fa-music"></i>
-                                </div>`
-                            }
+                    <div class="d-flex align-items-center mb-2">
+                        ${track.album_image ? 
+                            `<img src="${track.album_image}" class="track-image me-3" alt="Album cover">` :
+                            `<div class="track-image me-3">
+                                <i class="fas fa-music"></i>
+                            </div>`
+                        }
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">${track.name}</h6>
+                            <p class="card-text mb-0">${track.artists.join(', ')}</p>
+                            <p class="card-text small text-muted">${track.album}</p>
                         </div>
-                        <div class="col">
-                            <h6 class="card-title">${track.name}</h6>
-                            <p class="card-text">${track.artists.join(', ')}</p>
-                            <p class="card-text small">${track.album}</p>
-                        </div>
-                        <div class="col-auto">
-                            <div class="d-flex gap-2 align-items-center">
-                                ${track.preview_url ? 
-                                    `<audio controls class="small-audio">
-                                        <source src="${track.preview_url}" type="audio/mpeg">
-                                    </audio>` : 
-                                    '<span class="badge bg-warning">No preview</span>'
-                                }
-                                <a href="${track.external_url}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                    <i class="fab fa-spotify"></i>
-                                </a>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center justify-content-between">
+                        ${track.preview_url ? 
+                            `<audio controls class="small-audio flex-grow-1">
+                                <source src="${track.preview_url}" type="audio/mpeg">
+                            </audio>` : 
+                            '<span class="badge bg-warning">No preview</span>'
+                        }
+                        <a href="${track.external_url}" target="_blank" class="btn btn-success btn-sm">
+                            <i class="fab fa-spotify me-1"></i>Open
+                        </a>
                     </div>
                 </div>
             `;
         });
         
-        html += `</div></div>`;
+        html += `</div></div></div>`;
     } else {
         html += `
             <div class="alert alert-warning mt-3">
@@ -396,7 +397,6 @@ function displayResults(result, containerId) {
         `;
     }
     
-    html += `</div></div>`;
     container.innerHTML = html;
 }
 

@@ -43,9 +43,10 @@ def convert_numpy_types(obj):
         return obj
 
 class FacialEmotionAnalyzer:
-    def __init__(self, detector_backend='opencv'):
+    def __init__(self, detector_backend='retinaface'):
         """
         Initialize Facial Emotion Analyzer with robust error handling
+        Using retinaface for better face detection accuracy
         """
         self.detector_backend = detector_backend
         
@@ -103,13 +104,25 @@ class FacialEmotionAnalyzer:
                     try:
                         logger.info(f"Using DeepFace for analysis (backend: {self.detector_backend})")
                         
-                        analysis = DeepFace.analyze(
-                            img_path=processed_image_path if use_processed else image_path,
-                            actions=['emotion'],
-                            enforce_detection=False,  # Changed to False to handle no-face cases gracefully
-                            detector_backend=self.detector_backend,
-                            silent=True
-                        )
+                        # Try with primary detector first
+                        try:
+                            analysis = DeepFace.analyze(
+                                img_path=processed_image_path if use_processed else image_path,
+                                actions=['emotion'],
+                                enforce_detection=True,
+                                detector_backend='retinaface',  # Best for accuracy
+                                silent=True
+                            )
+                        except:
+                            # Fallback to opencv if retinaface fails
+                            logger.info("Retinaface failed, trying opencv")
+                            analysis = DeepFace.analyze(
+                                img_path=processed_image_path if use_processed else image_path,
+                                actions=['emotion'],
+                                enforce_detection=False,  # More lenient
+                                detector_backend='opencv',
+                                silent=True
+                            )
                         
                         logger.info(f"DeepFace analysis completed, result type: {type(analysis)}")
                         
@@ -299,13 +312,25 @@ class FacialEmotionAnalyzer:
                     # Convert BGR to RGB for DeepFace
                     rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
                     
-                    analysis = DeepFace.analyze(
-                        img_path=rgb_frame,
-                        actions=['emotion'],
-                        enforce_detection=False,  # Changed to False
-                        detector_backend=self.detector_backend,
-                        silent=True
-                    )
+                    # Try with primary detector first
+                    try:
+                        analysis = DeepFace.analyze(
+                            img_path=rgb_frame,
+                            actions=['emotion'],
+                            enforce_detection=True,
+                            detector_backend='retinaface',
+                            silent=True
+                        )
+                    except:
+                        # Fallback to opencv
+                        logger.info("Retinaface failed for webcam, trying opencv")
+                        analysis = DeepFace.analyze(
+                            img_path=rgb_frame,
+                            actions=['emotion'],
+                            enforce_detection=False,
+                            detector_backend='opencv',
+                            silent=True
+                        )
                     
                     if isinstance(analysis, list):
                         if len(analysis) > 0:

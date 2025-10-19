@@ -140,11 +140,17 @@ def analyze_image():
             if facial_analyzer:
                 logger.info("Using real facial analyzer")
                 emotion_result = facial_analyzer.detect_emotion_from_image(temp_path)
+                
+                # Log detailed emotion scores
+                if emotion_result and 'all_emotions' in emotion_result:
+                    logger.info(f"All emotion scores: {emotion_result['all_emotions']}")
+                    logger.info(f"Detected emotion: {emotion_result['emotion']} with confidence: {emotion_result['confidence']}")
+                    logger.info(f"Detection method: {emotion_result.get('method', 'unknown')}")
             else:
                 logger.info("Using fallback emotion detection")
                 emotion_result = simple_emotion_detection()
             
-            logger.info(f"Emotion result: {emotion_result}")
+            logger.info(f"Final emotion result: {emotion_result}")
             
             if not emotion_result:
                 logger.error("No emotion result")

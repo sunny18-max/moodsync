@@ -33,54 +33,71 @@ class SpotifyClient:
     def get_recommendations_by_emotion(self, emotion, limit=20):
         """
         Get music recommendations based on emotion with fallback to search
+        Enhanced with more precise emotion-to-music mappings
         """
         try:
-            # Map emotions to Spotify parameters
+            # Map emotions to Spotify parameters with improved precision
             emotion_params = {
                 'happy': {
-                    'seed_genres': ['pop', 'dance', 'electronic'],
-                    'target_danceability': 0.8,
-                    'target_energy': 0.8,
-                    'target_valence': 0.9,
-                    'min_tempo': 120
+                    'seed_genres': ['pop', 'dance', 'happy'],
+                    'target_danceability': 0.85,
+                    'target_energy': 0.85,
+                    'target_valence': 0.95,
+                    'min_valence': 0.7,
+                    'min_tempo': 115,
+                    'target_tempo': 128
                 },
                 'sad': {
                     'seed_genres': ['acoustic', 'sad', 'piano'],
-                    'target_danceability': 0.3,
-                    'target_energy': 0.3,
-                    'target_valence': 0.2,
-                    'max_tempo': 100
+                    'target_danceability': 0.25,
+                    'target_energy': 0.25,
+                    'target_valence': 0.15,
+                    'max_valence': 0.35,
+                    'max_tempo': 95,
+                    'target_tempo': 75,
+                    'target_acousticness': 0.7
                 },
                 'angry': {
                     'seed_genres': ['rock', 'metal', 'hard-rock'],
-                    'target_danceability': 0.6,
-                    'target_energy': 0.9,
-                    'target_valence': 0.3,
-                    'min_tempo': 140
+                    'target_danceability': 0.55,
+                    'target_energy': 0.95,
+                    'target_valence': 0.25,
+                    'min_energy': 0.8,
+                    'min_tempo': 130,
+                    'target_tempo': 150,
+                    'target_loudness': -5
                 },
                 'surprise': {
-                    'seed_genres': ['indie', 'alternative', 'experimental'],
+                    'seed_genres': ['indie', 'alternative', 'pop'],
                     'target_danceability': 0.7,
-                    'target_energy': 0.7,
-                    'target_valence': 0.7
+                    'target_energy': 0.75,
+                    'target_valence': 0.75,
+                    'min_valence': 0.5,
+                    'target_tempo': 120
                 },
                 'fear': {
-                    'seed_genres': ['ambient', 'cinematic', 'soundtrack'],
+                    'seed_genres': ['ambient', 'cinematic', 'chill'],
                     'target_danceability': 0.2,
-                    'target_energy': 0.3,
-                    'target_valence': 0.3
+                    'target_energy': 0.25,
+                    'target_valence': 0.3,
+                    'max_energy': 0.4,
+                    'target_acousticness': 0.6,
+                    'target_instrumentalness': 0.5
                 },
                 'disgust': {
-                    'seed_genres': ['industrial', 'experimental', 'noise'],
-                    'target_danceability': 0.4,
-                    'target_energy': 0.6,
-                    'target_valence': 0.3
+                    'seed_genres': ['alternative', 'grunge', 'punk'],
+                    'target_danceability': 0.45,
+                    'target_energy': 0.7,
+                    'target_valence': 0.3,
+                    'target_tempo': 110
                 },
                 'neutral': {
-                    'seed_genres': ['chill', 'ambient', 'indie'],
+                    'seed_genres': ['chill', 'lo-fi', 'indie'],
                     'target_danceability': 0.5,
                     'target_energy': 0.5,
-                    'target_valence': 0.5
+                    'target_valence': 0.5,
+                    'target_acousticness': 0.4,
+                    'target_tempo': 100
                 }
             }
             
