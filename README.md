@@ -24,5 +24,5 @@ A sophisticated machine learning application that recommends music based on dete
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/sunny18-max/moodsync.git
    cd mood-music-recommender
