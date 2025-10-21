@@ -58,10 +58,36 @@ class TextEmotionAnalyzer:
     def analyze_text_emotion(self, text):
         """Analyze emotion from text input"""
         try:
-            if not text or len(text.strip()) < 3:
-                return {'emotion': 'neutral', 'confidence': 1.0}
-            
-            # Simple rule-based fallback
+            if not text or len(text.strip()) < 1:
+                return {'emotion': 'neutral', 'confidence': 1.0, 'all_emotions': {e: (100 if e == 'neutral' else 0) for e in self.emotions}}
+
+            # Normalize input
+            text_stripped = text.strip().lower()
+            normalized = re.sub(r"[^a-z]+", "", text_stripped)
+
+            # 1) Hard match for single-word explicit emotions -> force 100%
+            direct_map = {
+                'happy': 'happy',
+                'joy': 'happy',
+                'sad': 'sad',
+                'angry': 'angry',
+                'mad': 'angry',
+                'surprise': 'surprise',
+                'surprised': 'surprise',
+                'fear': 'fear',
+                'scared': 'fear',
+                'afraid': 'fear',
+                'neutral': 'neutral'
+            }
+            if normalized in direct_map:
+                emo = direct_map[normalized]
+                return {
+                    'emotion': emo,
+                    'confidence': 1.0,
+                    'all_emotions': {e: (100.0 if e == emo else 0.0) for e in self.emotions}
+                }
+
+            # 2) Keyword signals (multi-word text)
             emotion_keywords = {
                 'happy': ['happy', 'joy', 'love', 'amazing', 'great', 'wonderful'],
                 'sad': ['sad', 'terrible', 'disappointed', 'bad', 'unhappy'],
@@ -69,36 +95,38 @@ class TextEmotionAnalyzer:
                 'surprise': ['surprise', 'wow', 'unbelievable', 'shocked'],
                 'fear': ['scared', 'fear', 'frightening', 'afraid']
             }
-            
-            text_lower = text.lower()
+
+            text_lower = text_stripped
             emotion_scores = {emotion: 0 for emotion in self.emotions}
-            
-            # Keyword matching
+
             for emotion, keywords in emotion_keywords.items():
                 for keyword in keywords:
                     if keyword in text_lower:
                         emotion_scores[emotion] += 1
-            
-            # Use ML model if available
+
+            # 3) Use ML model if available, else keyword fallback
             if self.model:
                 predicted_emotion = self.model.predict([text])[0]
                 probabilities = self.model.predict_proba([text])[0]
-                confidence = max(probabilities)
-                
+                confidence = float(np.max(probabilities))
+                # Map probabilities to full emotion set (missing -> 0.0)
+                class_probs = dict(zip(self.model.classes_, probabilities))
+                full_probs = {e: float(class_probs.get(e, 0.0)) for e in self.emotions}
                 return {
                     'emotion': predicted_emotion,
-                    'confidence': float(confidence),
-                    'all_emotions': dict(zip(self.model.classes_, probabilities))
+                    'confidence': confidence,
+                    'all_emotions': full_probs
                 }
             else:
-                # Fallback to keyword-based approach
-                dominant_emotion = max(emotion_scores.items(), key=lambda x: x[1])
+                dominant_emotion, count = max(emotion_scores.items(), key=lambda x: x[1])
+                if count == 0:
+                    dominant_emotion = 'neutral'
                 return {
-                    'emotion': dominant_emotion[0] if dominant_emotion[1] > 0 else 'neutral',
-                    'confidence': dominant_emotion[1] / 10.0,
-                    'all_emotions': emotion_scores
+                    'emotion': dominant_emotion,
+                    'confidence': min(1.0, count / 3.0) if dominant_emotion != 'neutral' else 0.5,
+                    'all_emotions': {e: (100.0 if e == dominant_emotion else 0.0) for e in self.emotions}
                 }
-                
+
         except Exception as e:
             logger.error(f"Error in text emotion analysis: {e}")
-            return {'emotion': 'neutral', 'confidence': 0.0}
+            return {'emotion': 'neutral', 'confidence': 0.0, 'all_emotions': {e: (100 if e == 'neutral' else 0) for e in self.emotions}}

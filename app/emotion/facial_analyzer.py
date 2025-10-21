@@ -128,17 +128,48 @@ class FacialEmotionAnalyzer:
                         
                         # Handle multiple faces or no faces
                         if isinstance(analysis, list):
-                            if len(analysis) > 0:
+                            faces_count = len(analysis)
+                            if faces_count > 0:
                                 analysis = analysis[0]  # Use first face
-                                logger.info(f"Detected {len(analysis)} faces, using first face")
+                                logger.info(f"Detected {faces_count} faces, using first face")
                             else:
                                 logger.warning("No faces detected in the image")
                                 return self._get_fallback_emotion("No faces detected. Please ensure the image contains a clear, front-facing face.")
-                        
+
                         emotion_scores = analysis['emotion']
                         dominant_emotion = analysis['dominant_emotion']
                         confidence = emotion_scores[dominant_emotion]
-                        
+
+                        # Optional: refine by re-analyzing the cropped face region for higher precision
+                        region = analysis.get('region', {})
+                        try:
+                            if all(k in region for k in ('x', 'y', 'w', 'h')):
+                                img_cv = cv2.imread(processed_image_path if use_processed else image_path)
+                                if img_cv is not None:
+                                    x, y, w, h = region['x'], region['y'], region['w'], region['h']
+                                    x, y = max(0, x), max(0, y)
+                                    face_crop = img_cv[y:y+h, x:x+w]
+                                    if face_crop.size > 0:
+                                        refined = DeepFace.analyze(
+                                            img_path=face_crop[:, :, ::-1],  # BGR->RGB
+                                            actions=['emotion'],
+                                            enforce_detection=False,
+                                            detector_backend='skip',
+                                            silent=True
+                                        )
+                                        if isinstance(refined, list) and len(refined) > 0:
+                                            refined = refined[0]
+                                        ref_scores = refined['emotion']
+                                        ref_dom = refined['dominant_emotion']
+                                        ref_conf = ref_scores[ref_dom]
+                                        if ref_conf > confidence:
+                                            emotion_scores = ref_scores
+                                            dominant_emotion = ref_dom
+                                            confidence = ref_conf
+                                            logger.info("Refined emotion using cropped face region")
+                        except Exception as _:
+                            pass
+
                         result = {
                             'emotion': dominant_emotion,
                             'confidence': float(confidence / 100.0),  # Convert to Python float
@@ -149,7 +180,7 @@ class FacialEmotionAnalyzer:
                             'image_info': image_info,
                             'timestamp': datetime.now().isoformat()
                         }
-                        
+
                         logger.info(f"Emotion detected: {dominant_emotion} (confidence: {confidence/100:.2f})")
                         return result
                         

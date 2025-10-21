@@ -6,6 +6,7 @@ import logging
 import os
 import tempfile
 import traceback
+import re
 
 # Configure logging without emojis for Windows compatibility
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -308,32 +309,47 @@ def analyze_text():
             emotion_result = text_analyzer.analyze_text_emotion(text)
         else:
             logger.info("Using fallback text analysis")
-            # Simple keyword-based fallback
-            text_lower = text.lower()
-            if any(word in text_lower for word in ['happy', 'joy', 'good', 'great', 'excited', 'wonderful']):
-                emotion = 'happy'
-                confidence = 0.8
-            elif any(word in text_lower for word in ['sad', 'bad', 'terrible', 'awful', 'depressed', 'unhappy']):
-                emotion = 'sad'
-                confidence = 0.8
-            elif any(word in text_lower for word in ['angry', 'mad', 'frustrated', 'annoyed', 'upset']):
-                emotion = 'angry'
-                confidence = 0.8
-            elif any(word in text_lower for word in ['surprise', 'surprised', 'wow', 'amazing', 'unbelievable']):
-                emotion = 'surprise'
-                confidence = 0.7
-            elif any(word in text_lower for word in ['fear', 'scared', 'afraid', 'frightened', 'terrified']):
-                emotion = 'fear'
-                confidence = 0.7
-            else:
-                emotion = 'neutral'
-                confidence = 0.5
-            
-            emotion_result = {
-                'emotion': emotion,
-                'confidence': confidence,
-                'all_emotions': {emotion: 100}
+            # Hard match for explicit single-word emotions => 100%
+            text_norm = re.sub(r"[^a-z]+", "", text.lower().strip())
+            direct_map = {
+                'happy': 'happy', 'joy': 'happy', 'sad': 'sad', 'angry': 'angry', 'mad': 'angry',
+                'surprise': 'surprise', 'surprised': 'surprise', 'fear': 'fear', 'scared': 'fear', 'afraid': 'fear',
+                'neutral': 'neutral'
             }
+            if text_norm in direct_map:
+                emo = direct_map[text_norm]
+                emotion_result = {
+                    'emotion': emo,
+                    'confidence': 1.0,
+                    'all_emotions': {e: (100.0 if e == emo else 0.0) for e in ['happy','sad','angry','surprise','fear','neutral']}
+                }
+            else:
+                # Simple keyword-based fallback
+                text_lower = text.lower()
+                if any(word in text_lower for word in ['happy', 'joy', 'good', 'great', 'excited', 'wonderful']):
+                    emotion = 'happy'
+                    confidence = 0.8
+                elif any(word in text_lower for word in ['sad', 'bad', 'terrible', 'awful', 'depressed', 'unhappy']):
+                    emotion = 'sad'
+                    confidence = 0.8
+                elif any(word in text_lower for word in ['angry', 'mad', 'frustrated', 'annoyed', 'upset']):
+                    emotion = 'angry'
+                    confidence = 0.8
+                elif any(word in text_lower for word in ['surprise', 'surprised', 'wow', 'amazing', 'unbelievable']):
+                    emotion = 'surprise'
+                    confidence = 0.7
+                elif any(word in text_lower for word in ['fear', 'scared', 'afraid', 'frightened', 'terrified']):
+                    emotion = 'fear'
+                    confidence = 0.7
+                else:
+                    emotion = 'neutral'
+                    confidence = 0.5
+
+                emotion_result = {
+                    'emotion': emotion,
+                    'confidence': confidence,
+                    'all_emotions': {e: (100.0 if e == emotion else 0.0) for e in ['happy','sad','angry','surprise','fear','neutral']}
+                }
         
         # Get music recommendations
         tracks = spotify_client.get_recommendations_by_emotion(emotion_result['emotion'])
@@ -451,4 +467,4 @@ if __name__ == '__main__':
         print("The application will use fallback methods")
         print("Check the logs for details")
     
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=True, port=5000, host='0.0.0.0', use_reloader=False)
